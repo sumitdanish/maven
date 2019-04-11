@@ -235,12 +235,16 @@ public class DefaultReportingConverter
 
         if ( !reportSet.getReports().isEmpty() )
         {
-            InputLocation location = reportSet.getLocation( "reports" );
-            Xpp3Dom reports = new Xpp3Dom( "reports", location );
+            InputLocation reportsLocation = reportSet.getLocation( "reports" );
+            if ( reportsLocation == null )
+            {
+                reportsLocation = location;
+            }
+            Xpp3Dom reports = new Xpp3Dom( "reports", reportsLocation );
             int n = 0;
             for ( String report : reportSet.getReports() )
             {
-                addDom( reports, "report", report, location.getLocation( n++ ) );
+                addDom( reports, "report", report, reportsLocation.getLocation( n++ ) );
             }
             dom.addChild( reports );
         }
