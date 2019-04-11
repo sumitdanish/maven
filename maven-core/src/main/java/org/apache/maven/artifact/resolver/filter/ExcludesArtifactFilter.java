@@ -19,22 +19,41 @@ package org.apache.maven.artifact.resolver.filter;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Exclusion;
 
 /**
  * Filter to exclude from a list of artifact patterns.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * TODO I think this is equiv. to exclusion set filter in maven-core
  */
 public class ExcludesArtifactFilter
-    extends IncludesArtifactFilter
+        extends IncludesArtifactFilter
 {
+
+    public static ArtifactFilter forExclusions( List<Exclusion> exclusions )
+    {
+        List<ModuleIdentifier> modules = new ArrayList<>();
+
+        for ( Exclusion exclusion : exclusions )
+        {
+            modules.add( new ModuleIdentifier( exclusion.getGroupId(), exclusion.getArtifactId() ) );
+        }
+        return new ExcludesArtifactFilter( modules );
+    }
+
     public ExcludesArtifactFilter( List<String> patterns )
     {
         super( patterns );
+    }
+
+    private ExcludesArtifactFilter( Collection<ModuleIdentifier> modules )
+    {
+        super( modules );
     }
 
     public boolean include( Artifact artifact )

@@ -20,7 +20,7 @@ package org.apache.maven.artifact.resolver.filter;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,43 +33,43 @@ import org.apache.maven.artifact.Artifact;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
 public class IncludesArtifactFilter
-    implements ArtifactFilter
+        implements ArtifactFilter
 {
-    private final Set<String> patterns;
+    private final Set<ModuleIdentifier> modules;
 
     public IncludesArtifactFilter( List<String> patterns )
     {
-        this.patterns = new LinkedHashSet<>( patterns );
+        this.modules = new LinkedHashSet<>();
+        for ( String pattern : patterns )
+        {
+            this.modules.add( ModuleIdentifier.fromString( pattern ) );
+        }
+    }
+
+    IncludesArtifactFilter( Collection<ModuleIdentifier> modules )
+    {
+        this.modules = new LinkedHashSet<>( modules );
     }
 
     public boolean include( Artifact artifact )
     {
-        String id = artifact.getGroupId() + ":" + artifact.getArtifactId();
-
-        boolean matched = false;
-        for ( Iterator<String> i = patterns.iterator(); i.hasNext() & !matched; )
-        {
-            // TODO what about wildcards? Just specifying groups? versions?
-            if ( id.equals( i.next() ) )
-            {
-                matched = true;
-            }
-        }
-        return matched;
+        return modules.contains( new ModuleIdentifier( artifact.getGroupId(), artifact.getArtifactId() ) );
     }
 
     public List<String> getPatterns()
     {
-        return new ArrayList<>( patterns );
+        List<String> result = new ArrayList<>();
+        for ( ModuleIdentifier module : modules )
+        {
+            result.add( module.toString() );
+        }
+        return result;
     }
 
     @Override
     public int hashCode()
     {
-        int hash = 17;
-        hash = hash * 31 + patterns.hashCode();
-
-        return hash;
+        return modules.hashCode();
     }
 
     @Override
@@ -80,7 +80,6 @@ public class IncludesArtifactFilter
             return true;
         }
 
-        // make sure IncludesArtifactFilter is not equal ExcludesArtifactFilter!
         if ( obj == null || getClass() != obj.getClass() )
         {
             return false;
@@ -88,6 +87,6 @@ public class IncludesArtifactFilter
 
         IncludesArtifactFilter other = (IncludesArtifactFilter) obj;
 
-        return patterns.equals( other.patterns );
+        return modules.equals( other.modules );
     }
 }

@@ -35,7 +35,6 @@ import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.repository.legacy.repository.ArtifactRepositoryFactory;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.Authentication;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
@@ -46,18 +45,18 @@ import org.apache.maven.artifact.resolver.filter.ExcludesArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
+import org.apache.maven.repository.ArtifactDoesNotExistException;
+import org.apache.maven.repository.ArtifactTransferFailedException;
+import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.DelegatingLocalArtifactRepository;
 import org.apache.maven.repository.LocalArtifactRepository;
-import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.MirrorSelector;
 import org.apache.maven.repository.Proxy;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.repository.ArtifactDoesNotExistException;
-import org.apache.maven.repository.ArtifactTransferFailedException;
+import org.apache.maven.repository.legacy.repository.ArtifactRepositoryFactory;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.building.SettingsProblem;
@@ -161,14 +160,7 @@ public class LegacyRepositorySystem
 
         if ( !d.getExclusions().isEmpty() )
         {
-            List<String> exclusions = new ArrayList<>();
-
-            for ( Exclusion exclusion : d.getExclusions() )
-            {
-                exclusions.add( exclusion.getGroupId() + ':' + exclusion.getArtifactId() );
-            }
-
-            artifact.setDependencyFilter( new ExcludesArtifactFilter( exclusions ) );
+            artifact.setDependencyFilter( ExcludesArtifactFilter.forExclusions( d.getExclusions() ) );
         }
 
         return artifact;

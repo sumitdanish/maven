@@ -49,7 +49,6 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.repository.Proxy;
 import org.apache.maven.repository.RepositorySystem;
@@ -116,14 +115,7 @@ public class MavenRepositorySystem
 
         if ( !d.getExclusions().isEmpty() )
         {
-            List<String> exclusions = new ArrayList<>();
-
-            for ( Exclusion exclusion : d.getExclusions() )
-            {
-                exclusions.add( exclusion.getGroupId() + ':' + exclusion.getArtifactId() );
-            }
-
-            artifact.setDependencyFilter( new ExcludesArtifactFilter( exclusions ) );
+            artifact.setDependencyFilter( ExcludesArtifactFilter.forExclusions( d.getExclusions() ) );
         }
 
         return artifact;
